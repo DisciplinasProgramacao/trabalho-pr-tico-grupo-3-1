@@ -2,14 +2,30 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 class Cliente {
-    private int pessoasTotal;
+    private String nome;
+    private int idade;
+    private String dataEntrada;
 
-    public Cliente(int pessoasTotal) {
-        this.pessoasTotal = pessoasTotal;
+    public Cliente(String nome, int idade, String dataEntrada) {
+        this.nome = nome;
+        this.idade = idade;
+        this.dataEntrada = dataEntrada;
     }
 
-    public int getPessoasTotal() {
-        return pessoasTotal;
+    public String getNome() {
+        return nome;
+    }
+
+    public int getIdade() {
+        return idade;
+    }
+
+    public String getDataEntrada() {
+        return dataEntrada;
+    }
+
+    public void fazerRequisicao(Restaurante restaurante) {
+        restaurante.chegadaCliente(this);
     }
 }
 
@@ -53,15 +69,11 @@ class Mesa {
     }
 
     public boolean verificarOcupacao() {
-        return !ocupacao;
+        return ocupacao;
     }
 
     public int getTotalDeLugar() {
         return totalDeLugar;
-    }
-
-    public boolean temEspacoParaCliente(Cliente cliente) {
-        return totalDeLugar >= cliente.getPessoasTotal();
     }
 }
 
@@ -113,18 +125,8 @@ class Restaurante {
     }
 
     public void chegadaCliente(Cliente cliente) {
-        if (cliente.getPessoasTotal() > 8) {
-            for (Mesa mesa : totalMesas) {
-                if (mesa.verificarOcupacao() && mesa.temEspacoParaCliente(cliente)) {
-                    mesa.inserirCliente(cliente);
-                    return;
-                }
-            }
+        if (!atribuirMesa(cliente)) {
             colocarNaFilaEspera(cliente);
-        } else {
-            if (!atribuirMesa(cliente)) {
-                colocarNaFilaEspera(cliente);
-            }
         }
     }
 
@@ -138,7 +140,7 @@ class Restaurante {
 
     public boolean atribuirMesa(Cliente cliente) {
         for (Mesa mesa : totalMesas) {
-            if (mesa.verificarOcupacao() && cliente.getPessoasTotal() <= mesa.getTotalDeLugar()) {
+            if (mesa.verificarOcupacao() && cliente.getIdade() <= mesa.getTotalDeLugar()) {
                 mesa.inserirCliente(cliente);
                 return true;
             }
@@ -164,9 +166,13 @@ public class Main {
         int numeroClientes = scanner.nextInt();
 
         for (int i = 0; i < numeroClientes; i++) {
-            System.out.print("Informe o número de pessoas do cliente " + (i + 1) + ": ");
-            int numeroPessoas = scanner.nextInt();
-            restaurante.chegadaCliente(new Cliente(numeroPessoas));
+            System.out.print("Informe o nome do cliente " + (i + 1) + ": ");
+            String nome = scanner.next();
+            System.out.print("Informe a idade do cliente " + (i + 1) + ": ");
+            int idade = scanner.nextInt();
+            System.out.print("Informe a data de entrada do cliente " + (i + 1) + " (DD/MM/AAAA): ");
+            String dataEntrada = scanner.next();
+            restaurante.chegadaCliente(new Cliente(nome, idade, dataEntrada));
         }
 
         scanner.close();
