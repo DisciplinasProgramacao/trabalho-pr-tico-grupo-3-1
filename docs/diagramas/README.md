@@ -9,5 +9,5 @@ Versão 1.0
 </html>
 Versao 2.0
 <html>
-<img src="Diagrama3.0.png">  
+<img src="Diagrama3.0.jpg">  
 </html>
