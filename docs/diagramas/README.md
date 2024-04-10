@@ -7,3 +7,7 @@ Versão 1.0
 <html>
 <img src="Diagrama2.0.png">  
 </html>
+Versao 2.0
+<html>
+<img src="Diagrama3.0.png">  
+</html>
