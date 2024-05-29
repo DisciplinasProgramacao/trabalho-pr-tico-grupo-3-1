@@ -17,9 +17,9 @@ public class Requisicao {
     )
     private Long id;
     private String tipo;
+   
 
-
-    public Requisicao() {
+    public Requisicao(int i, int j, int k, int l) {
     }
 
     public Requisicao(Long id, String tipo) {
@@ -27,9 +27,7 @@ public class Requisicao {
         this.tipo = tipo;
     }
 
-    public Requisicao(String nome) {
-        this.tipo = tipo;
-    }
+    
 
     public Long getId() {
         return id;
