@@ -1,58 +1,84 @@
 package com.grupo3.trabalhopratico.models;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
-@Entity
-@Table
+
+
+
 public class Requisicao {
-    @Id
-    @SequenceGenerator(
-            name = "requisicao_sequence",
-            sequenceName = "requisicao_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "requisicao_sequence"
-    )
-    private Long id;
+    
+    
+    private int id;
     private String tipo;
-   
+    private Mesa mesa;
+    private Cliente cliente;
+    private LocalDateTime entrada;
+    private LocalDateTime saida;
+    private boolean status;
+    private int quant; 
+    private static int identificacao ;
 
-    public Requisicao(int i, int j, int k, int l) {
+
+
+    private void init(Cliente cliente, int quant, boolean status){
+        this.cliente = cliente;
+        this.quant = quant;
+        this.status = status;
+        this.entrada = LocalDateTime.now();
+        this.id=identificacao;
+        identificacao++;
     }
 
-    public Requisicao(Long id, String tipo) {
-        this.id = id;
-        this.tipo = tipo;
+    
+    
+    public void FecharConta(){
+        saida = LocalDateTime.now();
+        mesa.setOcupada(false);
+        this.status = false;
+    }    
+
+    public Requisicao (Cliente cliente, int qPessoas, boolean status){
+        init(cliente, qPessoas, status);
     }
 
-    public Requisicao() {
 
+
+    public LocalDateTime getEntrada() {
+        return entrada;
     }
 
+    public LocalDateTime getSaida() {
+        return saida;
+    }
 
-    public Long getId() {
+    public Mesa getMesa() {
+        return mesa;
+    }
+
+    public void setMesa(Mesa mesa) {
+        this.mesa = mesa;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+    public int getId(int id) {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public String getTipo() {
-        return tipo;
+   
+        
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
 
-    @Override
-    public String toString() {
-        return "Produto{" +
-                "id=" + id +
-                ", tipo='" + tipo + '\'' +
-                '}';
-    }
-}
+
+	
+
+
+
+    
+
