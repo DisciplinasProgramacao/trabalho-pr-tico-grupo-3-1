@@ -27,7 +27,10 @@ public class Requisicao {
         this.tipo = tipo;
     }
 
-    
+    public Requisicao() {
+
+    }
+
 
     public Long getId() {
         return id;

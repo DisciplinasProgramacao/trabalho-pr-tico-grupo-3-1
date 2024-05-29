@@ -15,5 +15,5 @@ public interface RequisicaoRepository extends JpaRepository<Requisicao, Long> {
     Optional<Requisicao> findRequisicaoById(Long id);
 
     @Query("SELECT r FROM Requisicao r")
-    Optional<Requisicao> findRequisicao ();
+    Optional<Requisicao> findRequisicao();
 }

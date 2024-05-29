@@ -28,9 +28,8 @@ public class RequisicaoController {
     }
 
     @DeleteMapping(path = "{idRequisicao}")
-    public void deleteRequisicao(@PathVariable("idRequisicao") Long produtoId){
-        requisicaoService.deleteRequisicao(produtoId);
+    public void deleteRequisicao(@PathVariable("idRequisicao") Long requisicaoId){
+        requisicaoService.deleteRequisicao(requisicaoId);
     }
-
 }
 
