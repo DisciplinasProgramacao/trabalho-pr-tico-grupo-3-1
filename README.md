@@ -1,4 +1,4 @@
-# Nome do projeto
+# Trabalho de Laboratório de Programação Modular
 Escreva um ou dois parágrafos resumindo o objetivo do seu projeto.
 
 ## Alunos integrantes da equipe
