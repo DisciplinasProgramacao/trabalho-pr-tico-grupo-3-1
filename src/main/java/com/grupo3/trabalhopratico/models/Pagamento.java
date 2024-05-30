@@ -23,6 +23,10 @@ public class Pagamento {
     public String metodoPagamento;
     public int dataPagamento;
 
+    public Pagamento() {
+
+    }
+
     public Pagamento(Long id, double valorBrutoTotal, double valorLiquidoTotal, double valorPago, double valorDescontado, String metodoPagamento, int dataPagamento) {
         this.id = id;
         this.valorBrutoTotal = valorBrutoTotal;
@@ -39,6 +43,7 @@ public class Pagamento {
         this.valorPago = valorPago;
         this.valorDescontado = valorDescontado;
     }
+
 
     public Long getId() {
         return id;
