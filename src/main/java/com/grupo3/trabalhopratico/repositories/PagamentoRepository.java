@@ -5,16 +5,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
+    List<Pagamento> findByDataPagamento(LocalDate dataPagamento);
 
-    @Query("SELECT s FROM Pagamento s WHERE s.metodoPagamento = ?1")
-    Optional<Pagamento> findPagamentoByMetodo(String metodoPagamento);
+    List<Pagamento> findByMetodoPagamento(String metodoPagamento);
 
-    @Query("SELECT s FROM Pagamento s WHERE s.dataPagamento = ?1")
-    Optional<Pagamento> findPagamentoByData(int dataPagamento);
+    @Query("SELECT p FROM Pagamento p WHERE p.dataPagamento = ?1 AND p.metodoPagamento = ?2")
+    List<Pagamento> findByDataPagamentoAndMetodoPagamento(LocalDate dataPagamento, String metodoPagamento);
 }
-

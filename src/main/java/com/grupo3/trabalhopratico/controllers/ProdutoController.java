@@ -2,6 +2,7 @@ package com.grupo3.trabalhopratico.controllers;
 
 import com.grupo3.trabalhopratico.models.Produto;
 import com.grupo3.trabalhopratico.services.ProdutoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public void registerNewProduto(@RequestBody Produto produto){
+    public void registerNewProduto(@Valid @RequestBody Produto produto){
         produtoService.addNewProduto(produto);
     }
 
