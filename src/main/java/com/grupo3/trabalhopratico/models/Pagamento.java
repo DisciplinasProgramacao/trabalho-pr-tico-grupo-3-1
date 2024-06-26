@@ -1,49 +1,39 @@
 package com.grupo3.trabalhopratico.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDate;
 
 @Entity
-@Table
 public class Pagamento {
+
     @Id
-    @SequenceGenerator(
-            name = "payment_sequence",
-            sequenceName = "payment_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "payment_sequence"
-    )
-    public Long id;
-    private double valorBrutoTotal;
-    private double valorLiquidoTotal;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotNull(message = "O valor pago é obrigatório")
     private double valorPago;
+
+    @NotNull(message = "O valor descontado é obrigatório")
     private double valorDescontado;
-    public String metodoPagamento;
-    public int dataPagamento;
 
-    public Pagamento() {
+    @NotNull(message = "O método de pagamento é obrigatório")
+    private String metodoPagamento;
 
-    }
+    @NotNull(message = "A data de pagamento é obrigatória")
+    private LocalDate dataPagamento;
 
-    public Pagamento(Long id, double valorBrutoTotal, double valorLiquidoTotal, double valorPago, double valorDescontado, String metodoPagamento, int dataPagamento) {
+    public Pagamento(Long id, double valorPago, double valorDescontado, String metodoPagamento, LocalDate dataPagamento) {
         this.id = id;
-        this.valorBrutoTotal = valorBrutoTotal;
-        this.valorLiquidoTotal = valorLiquidoTotal;
         this.valorPago = valorPago;
         this.valorDescontado = valorDescontado;
         this.metodoPagamento = metodoPagamento;
         this.dataPagamento = dataPagamento;
     }
-
-    public Pagamento(double valorBrutoTotal, double valorLiquidoTotal, double valorPago, double valorDescontado) {
-        this.valorBrutoTotal = valorBrutoTotal;
-        this.valorLiquidoTotal = valorLiquidoTotal;
-        this.valorPago = valorPago;
-        this.valorDescontado = valorDescontado;
-    }
-
 
     public Long getId() {
         return id;
@@ -51,22 +41,6 @@ public class Pagamento {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public double getValorBrutoTotal() {
-        return valorBrutoTotal;
-    }
-
-    public void setValorBrutoTotal(double valorBrutoTotal) {
-        this.valorBrutoTotal = valorBrutoTotal;
-    }
-
-    public double getValorLiquidoTotal() {
-        return valorLiquidoTotal;
-    }
-
-    public void setValorLiquidoTotal(double valorLiquidoTotal) {
-        this.valorLiquidoTotal = valorLiquidoTotal;
     }
 
     public double getValorPago() {
@@ -93,24 +67,11 @@ public class Pagamento {
         this.metodoPagamento = metodoPagamento;
     }
 
-    public int getDataPagamento() {
+    public LocalDate getDataPagamento() {
         return dataPagamento;
     }
 
-    public void setDataPagamento(int dataPagamento) {
+    public void setDataPagamento(LocalDate dataPagamento) {
         this.dataPagamento = dataPagamento;
-    }
-
-    @Override
-    public String toString() {
-        return "Pagamento{" +
-                "id=" + id +
-                ", valorBrutoTotal='" + valorBrutoTotal + '\'' +
-                ", valorLiquidoTotal=" + valorLiquidoTotal + '\'' +
-                ", valorPago=" + valorPago + '\'' +
-                ", valorDescontado=" + valorDescontado + '\'' +
-                ", metodoPagamento='" + metodoPagamento + '\'' +
-                ", dataPagamento=" + dataPagamento + '\'' +
-                '}';
     }
 }

@@ -5,8 +5,8 @@ import com.grupo3.trabalhopratico.repositories.PagamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PagamentoService {
@@ -18,16 +18,19 @@ public class PagamentoService {
         this.pagamentoRepository = pagamentoRepository;
     }
 
-    public List<Pagamento> getPagamentos(){
-        return pagamentoRepository.findAll();
+    public List<Pagamento> getPagamentos(LocalDate data, String metodoPagamento) {
+        if (data != null && metodoPagamento != null) {
+            return pagamentoRepository.findByDataPagamentoAndMetodoPagamento(data, metodoPagamento);
+        } else if (data != null) {
+            return pagamentoRepository.findByDataPagamento(data);
+        } else if (metodoPagamento != null) {
+            return pagamentoRepository.findByMetodoPagamento(metodoPagamento);
+        } else {
+            return pagamentoRepository.findAll();
+        }
     }
 
     public void addNewPagamento(Pagamento pagamento) {
-        Optional<Pagamento> pagamentoOptional = pagamentoRepository.findPagamentoByMetodo(pagamento.getMetodoPagamento());
-        if(pagamentoOptional.isPresent()){
-            throw new IllegalStateException("Pagamento ja existe!!!");
-        }
         pagamentoRepository.save(pagamento);
     }
 }
-
