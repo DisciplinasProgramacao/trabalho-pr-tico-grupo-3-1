@@ -51,6 +51,7 @@ public class RequisicaoService {
         if (mesaOptional.isPresent()) {
             Mesa mesa = mesaOptional.get();
             mesa.setDisponivel(false);
+            mesaService.save(mesa);
             requisicao.setMesa(mesa);
             requisicao.setEmAtendimento(true);
             requisicao.setTipo(Requisicao.TipoRequisicao.EM_ATENDIMENTO);

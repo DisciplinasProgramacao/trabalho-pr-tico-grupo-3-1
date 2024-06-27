@@ -1,5 +1,6 @@
 package com.grupo3.trabalhopratico.models;
 
+import com.grupo3.trabalhopratico.models.Reserva;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,12 +20,13 @@ public class Mesa {
 
     public Mesa(int capacidade) {
         this.capacidade = capacidade;
+        this.status = false; // Inicialmente disponível
     }
 
     public Mesa(int id, int capacidade) {
         this.id = (long) id;
         this.capacidade = capacidade;
-        this.status = false;
+        this.status = false; // Inicialmente disponível
     }
 
     public Long getId() {
@@ -36,11 +38,11 @@ public class Mesa {
     }
 
     public boolean isDisponivel() {
-        return !status;
+        return !status; // Se status é false, está disponível
     }
 
-    public void setDisponivel(boolean status) {
-        this.status = status;
+    public void setDisponivel(boolean disponivel) {
+        this.status = !disponivel; // Se disponivel é true, status deve ser false
     }
 
     public Reserva getReserva() {

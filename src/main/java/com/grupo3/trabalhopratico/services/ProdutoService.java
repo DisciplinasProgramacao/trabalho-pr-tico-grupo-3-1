@@ -32,14 +32,14 @@ public class ProdutoService {
     }
 
     public void deleteProduto(Long produtoId) {
-        if (!produtoRepository.existsById(produtoId)) {
+        if (produtoRepository.findProdutoById(produtoId).isEmpty()) {
             throw new EntityNotFoundException("Produto não encontrado.");
         }
         produtoRepository.deleteById(produtoId);
     }
 
     public void updateProduto(Long produtoId, String nome, double preco) {
-        Produto produto = produtoRepository.findById(produtoId)
+        Produto produto = produtoRepository.findProdutoById(produtoId)
                 .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado."));
 
         if (nome != null && !nome.isEmpty()) {

@@ -50,16 +50,17 @@ public class ProdutoController {
         }
     }
 
-    @PutMapping(path = "{produtoId}")
+    @PutMapping("/{produtoId}")
     public ResponseEntity<String> updateProduto(
-            @PathVariable("produtoId") Long produtoId,
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) double preco) {
+            @PathVariable Long produtoId,
+            @Valid @RequestBody Produto produtoDetails) {
         try {
-            produtoService.updateProduto(produtoId, nome, preco);
-            return ResponseEntity.status(HttpStatus.OK).body("Produto atualizado com sucesso.");
+            produtoService.updateProduto(produtoId, produtoDetails.getNome(), produtoDetails.getPreco());
+            return ResponseEntity.ok("Produto atualizado com sucesso.");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atualizar o produto.");
         }
     }
 }

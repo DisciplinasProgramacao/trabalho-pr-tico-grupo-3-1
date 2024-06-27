@@ -35,4 +35,8 @@ public class MesaService {
                 .filter(m -> m.isDisponivel() && m.getCapacidade() >= numeroPessoas)
                 .findFirst();
     }
+
+    public void save(Mesa mesa) {
+        mesaRepository.save(mesa);
+    }
 }
