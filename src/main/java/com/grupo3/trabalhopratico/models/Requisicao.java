@@ -2,11 +2,16 @@ package com.grupo3.trabalhopratico.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 public class Requisicao {
+
+    public enum TipoRequisicao {
+        EM_ATENDIMENTO,
+        NA_FILA
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,27 +22,48 @@ public class Requisicao {
     private String nomeCliente;
 
     @Min(value = 1, message = "O número de pessoas deve ser maior que 0")
-    @Max(value = 10, message = "O número de pessoas deve ser menor ou igual a 10") // Supondo que a capacidade máxima seja 10
+    @Max(value = 10, message = "O número de pessoas deve ser menor ou igual a 10")
     private int numeroPessoas;
 
     private boolean ativa;
-    private boolean emAtendimento;
+
+    @Enumerated(EnumType.STRING)
+    private TipoRequisicao tipo;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Produto> produtos;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "cliente_id", nullable = false)
     @NotNull(message = "É obrigatório ter um cliente na requisição")
-    @Embedded
     private Cliente cliente;
 
-    public Requisicao(Long id, String nomeCliente, int numeroPessoas, boolean ativa, boolean emAtendimento, List<Produto> produtos, Cliente cliente) {
+    @ManyToOne
+    @JoinColumn(name = "reserva_id")
+    private Reserva reserva;
+
+    @ManyToOne
+    @JoinColumn(name = "mesa_id")
+    private Mesa mesa;
+
+    private boolean emAtendimento;
+
+    private LocalDateTime horaEntrada;
+    private LocalDateTime horaSaida;
+
+    public Requisicao() {}
+
+    public Requisicao(Long id, String nomeCliente, int numeroPessoas, boolean ativa, TipoRequisicao tipo, List<Produto> produtos, Cliente cliente, Mesa mesa, LocalDateTime horaEntrada) {
         this.id = id;
         this.nomeCliente = nomeCliente;
         this.numeroPessoas = numeroPessoas;
         this.ativa = ativa;
-        this.emAtendimento = emAtendimento;
+        this.tipo = tipo;
         this.produtos = produtos;
         this.cliente = cliente;
+        this.mesa = mesa;
+        this.emAtendimento = false;
+        this.horaEntrada = horaEntrada;
     }
 
     public Long getId() {
@@ -72,12 +98,12 @@ public class Requisicao {
         this.ativa = ativa;
     }
 
-    public boolean isEmAtendimento() {
-        return emAtendimento;
+    public TipoRequisicao getTipo() {
+        return tipo;
     }
 
-    public void setEmAtendimento(boolean emAtendimento) {
-        this.emAtendimento = emAtendimento;
+    public void setTipo(TipoRequisicao tipo) {
+        this.tipo = tipo;
     }
 
     public List<Produto> getProdutos() {
@@ -94,5 +120,45 @@ public class Requisicao {
 
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
+    }
+
+    public Reserva getReserva() {
+        return reserva;
+    }
+
+    public void setReserva(Reserva reserva) {
+        this.reserva = reserva;
+    }
+
+    public Mesa getMesa() {
+        return mesa;
+    }
+
+    public void setMesa(Mesa mesa) {
+        this.mesa = mesa;
+    }
+
+    public boolean isEmAtendimento() {
+        return emAtendimento;
+    }
+
+    public void setEmAtendimento(boolean emAtendimento) {
+        this.emAtendimento = emAtendimento;
+    }
+
+    public LocalDateTime getHoraEntrada() {
+        return horaEntrada;
+    }
+
+    public void setHoraEntrada(LocalDateTime horaEntrada) {
+        this.horaEntrada = horaEntrada;
+    }
+
+    public LocalDateTime getHoraSaida() {
+        return horaSaida;
+    }
+
+    public void setHoraSaida(LocalDateTime horaSaida) {
+        this.horaSaida = horaSaida;
     }
 }

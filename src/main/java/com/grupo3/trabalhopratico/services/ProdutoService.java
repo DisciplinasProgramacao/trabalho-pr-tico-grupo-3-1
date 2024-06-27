@@ -24,6 +24,7 @@ public class ProdutoService {
     }
 
     public void addNewProduto(Produto produto) {
+        validateProdutoTypeLimits(produto);
         if (produtoRepository.findProdutoByNome(produto.getNome()).isPresent()) {
             throw new DuplicateEntityException("Já existe um produto com este nome.");
         }
@@ -48,5 +49,21 @@ public class ProdutoService {
             produto.setPreco(preco);
         }
         produtoRepository.save(produto);
+    }
+
+    private void validateProdutoTypeLimits(Produto produto) {
+        if (produto.getTipo().equalsIgnoreCase("prato")) {
+            long countPratos = produtoRepository.countByTipo("prato");
+            if (countPratos >= 6) {
+                throw new IllegalArgumentException("Limite máximo de 6 pratos já atingido.");
+            }
+        } else if (produto.getTipo().equalsIgnoreCase("bebida")) {
+            long countBebidas = produtoRepository.countByTipo("bebida");
+            if (countBebidas >= 5) {
+                throw new IllegalArgumentException("Limite máximo de 5 bebidas já atingido.");
+            }
+        } else {
+            throw new IllegalArgumentException("Tipo de produto inválido.");
+        }
     }
 }

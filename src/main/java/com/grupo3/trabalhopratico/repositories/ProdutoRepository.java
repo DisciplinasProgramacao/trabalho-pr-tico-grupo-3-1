@@ -16,4 +16,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     @Query("SELECT p FROM Produto p WHERE p.preco = ?1")
     Optional<Produto> findProdutoByPreco(double preco);
+
+    @Query("SELECT COUNT(p) FROM Produto p WHERE p.tipo = ?1")
+    long countByTipo(String tipo);
 }

@@ -35,6 +35,8 @@ public class Pagamento {
         this.dataPagamento = dataPagamento;
     }
 
+    public Pagamento() {}
+
     public Long getId() {
         return id;
     }

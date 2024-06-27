@@ -23,18 +23,24 @@ public class RequisicaoController {
     }
 
     @GetMapping
-    public List<Requisicao> getRequisicoes(@RequestParam Optional<String> tipo) {
+    public ResponseEntity<List<Requisicao>> getRequisicoes(@RequestParam Optional<String> tipo) {
+        List<Requisicao> requisicoes;
         if (tipo.isPresent()) {
-            return requisicaoService.getRequisicoesByTipo(tipo.get());
+            requisicoes = requisicaoService.getRequisicoesByTipo(tipo.get());
         } else {
-            return requisicaoService.getRequisicoesAtivas();
+            requisicoes = requisicaoService.getRequisicoesAtivas();
         }
+        return ResponseEntity.ok(requisicoes);
     }
 
     @PostMapping
     public ResponseEntity<String> registerNewRequisicao(@Valid @RequestBody Requisicao requisicao) {
         requisicaoService.addNewRequisicao(requisicao);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Requisição criada com sucesso");
+        if (requisicao.getMesa() != null) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Requisição criada com sucesso e alocada na mesa.");
+        } else {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Requisição criada com sucesso e adicionada à fila de espera.");
+        }
     }
 
     @GetMapping(path = "{idRequisicao}")
@@ -47,6 +53,12 @@ public class RequisicaoController {
     public ResponseEntity<String> addProdutosToRequisicao(@PathVariable("idRequisicao") Long requisicaoId, @RequestBody List<Produto> produtos) {
         requisicaoService.addProdutosToRequisicao(requisicaoId, produtos);
         return ResponseEntity.status(HttpStatus.OK).body("Produtos adicionados à requisição com sucesso");
+    }
+
+    @PutMapping(path = "{idRequisicao}/emAtendimento")
+    public ResponseEntity<String> setRequisicaoEmAtendimento(@PathVariable("idRequisicao") Long requisicaoId) {
+        requisicaoService.setRequisicaoEmAtendimento(requisicaoId);
+        return ResponseEntity.status(HttpStatus.OK).body("Requisição marcada como em atendimento");
     }
 
     @DeleteMapping(path = "{idRequisicao}")

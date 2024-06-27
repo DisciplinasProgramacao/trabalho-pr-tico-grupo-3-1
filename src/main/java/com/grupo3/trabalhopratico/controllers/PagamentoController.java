@@ -2,7 +2,6 @@ package com.grupo3.trabalhopratico.controllers;
 
 import com.grupo3.trabalhopratico.models.Pagamento;
 import com.grupo3.trabalhopratico.services.PagamentoService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -42,7 +41,7 @@ public class PagamentoController {
     }
 
     @PostMapping
-    public ResponseEntity<String> registerNewPagamento(@Valid @RequestBody Pagamento pagamento) {
+    public ResponseEntity<String> registerNewPagamento(@RequestBody Pagamento pagamento) {
         pagamentoService.addNewPagamento(pagamento);
         return ResponseEntity.status(HttpStatus.CREATED).body("Pagamento registrado com sucesso");
     }
