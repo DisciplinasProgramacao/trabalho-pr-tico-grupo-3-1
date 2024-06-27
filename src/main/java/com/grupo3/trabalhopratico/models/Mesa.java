@@ -1,51 +1,60 @@
 package com.grupo3.trabalhopratico.models;
 
+import com.grupo3.trabalhopratico.models.Reserva;
+import jakarta.persistence.*;
 
+@Entity
 public class Mesa {
-    private int id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private int capacidade;
     private boolean status;
 
-    public Mesa(int id) {
-        this.id = id;
-        this.status = false;
-    
-        if(capacidade <= 0){
-            this.capacidade =4;
-        }else if(capacidade>4 || capacidade <=6){
-            this.capacidade =6;
-        }else if(capacidade>6){
-            this.capacidade=8;
-        }    
+    @ManyToOne
+    @JoinColumn(name = "reserva_id")
+    private Reserva reserva;
+
+    public Mesa() {}
+
+    public Mesa(int capacidade) {
+        this.capacidade = capacidade;
+        this.status = false; // Inicialmente disponível
     }
 
+    public Mesa(int id, int capacidade) {
+        this.id = (long) id;
+        this.capacidade = capacidade;
+        this.status = false; // Inicialmente disponível
+    }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
+
     public int getCapacidade() {
         return capacidade;
     }
 
-    public boolean StatusMesa() {
-        return status;
-    }
-    
-    
-    public void setStatus(boolean status) {
-        this.status = status;
+    public boolean isDisponivel() {
+        return !status; // Se status é false, está disponível
     }
 
+    public void setDisponivel(boolean disponivel) {
+        this.status = !disponivel; // Se disponivel é true, status deve ser false
+    }
+
+    public Reserva getReserva() {
+        return reserva;
+    }
+
+    public void setReserva(Reserva reserva) {
+        this.reserva = reserva;
+    }
 
     @Override
     public String toString() {
         return "Id Mesa: " + id + ", Capacidade: " + capacidade;
     }
-
-    public boolean setOcupada(boolean status) {
-        return status = false;
-    }
-
-
-   
 }
