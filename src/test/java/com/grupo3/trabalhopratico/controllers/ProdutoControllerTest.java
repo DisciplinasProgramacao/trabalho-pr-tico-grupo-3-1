@@ -1,5 +1,8 @@
 package com.grupo3.trabalhopratico.controllers;
 
+import com.grupo3.trabalhopratico.controllers.ProdutoController;
+import com.grupo3.trabalhopratico.exceptions.DuplicateEntityException;
+import com.grupo3.trabalhopratico.exceptions.EntityNotFoundException;
 import com.grupo3.trabalhopratico.models.Produto;
 import com.grupo3.trabalhopratico.services.ProdutoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,8 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,56 +33,85 @@ public class ProdutoControllerTest {
 
     @Test
     public void testGetProdutos() {
-        List<Produto> produtos = Arrays.asList(
-                new Produto(1L, "Produto A", 10.0, "bebida", "Descrição A"),
-                new Produto(2L, "Produto B", 20.0, "comida", "Descrição B")
-        );
+        Produto produto = new Produto();
+        List<Produto> produtos = Collections.singletonList(produto);
 
         when(produtoService.getProdutos()).thenReturn(produtos);
 
-        List<Produto> result = produtoController.getProdutos();
+        List<Produto> response = produtoController.getProdutos();
 
-        assertEquals(2, result.size());
-        assertEquals("Produto A", result.get(0).getNome());
-        assertEquals(10.0, result.get(0).getPreco());
-        assertEquals("Produto B", result.get(1).getNome());
-        assertEquals(20.0, result.get(1).getPreco());
-
-        verify(produtoService, times(1)).getProdutos();
+        assertEquals(1, response.size());
+        assertEquals(produto, response.get(0));
     }
 
     @Test
     public void testRegisterNewProduto() {
-        Produto produto = new Produto(3L, "Produto C", 30.0, "bebida", "Descrição C");
+        Produto produto = new Produto();
+        ResponseEntity<String> response = produtoController.registerNewProduto(produto);
 
-        doNothing().when(produtoService).addNewProduto(produto);
-
-        produtoController.registerNewProduto(produto);
-
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals("Produto criado com sucesso.", response.getBody());
         verify(produtoService, times(1)).addNewProduto(produto);
+    }
+
+    @Test
+    public void testRegisterNewProduto_DuplicateEntityException() {
+        Produto produto = new Produto();
+
+        doThrow(new DuplicateEntityException("Produto já existe")).when(produtoService).addNewProduto(produto);
+
+        ResponseEntity<String> response = produtoController.registerNewProduto(produto);
+
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("Produto já existe", response.getBody());
     }
 
     @Test
     public void testDeleteProduto() {
         Long produtoId = 1L;
+        ResponseEntity<String> response = produtoController.deleteProduto(produtoId);
 
-        doNothing().when(produtoService).deleteProduto(produtoId);
-
-        produtoController.deleteProduto(produtoId);
-
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Produto excluído com sucesso.", response.getBody());
         verify(produtoService, times(1)).deleteProduto(produtoId);
+    }
+
+    @Test
+    public void testDeleteProduto_EntityNotFoundException() {
+        Long produtoId = 1L;
+
+        doThrow(new EntityNotFoundException("Produto não encontrado.")).when(produtoService).deleteProduto(produtoId);
+
+        ResponseEntity<String> response = produtoController.deleteProduto(produtoId);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertEquals("Produto não encontrado.", response.getBody());
     }
 
     @Test
     public void testUpdateProduto() {
         Long produtoId = 1L;
-        String novoNome = "Produto A Atualizado";
-        double novoPreco = 15.0;
+        Produto produtoDetails = new Produto();
+        produtoDetails.setNome("Nome Atualizado");
+        produtoDetails.setPreco(20.0);
 
-        doNothing().when(produtoService).updateProduto(produtoId, novoNome, novoPreco);
+        ResponseEntity<String> response = produtoController.updateProduto(produtoId, produtoDetails);
 
-        produtoController.updateProduto(produtoId, novoNome, novoPreco);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Produto atualizado com sucesso.", response.getBody());
+        verify(produtoService, times(1)).updateProduto(produtoId, "Nome Atualizado", 20.0);
+    }
 
-        verify(produtoService, times(1)).updateProduto(produtoId, novoNome, novoPreco);
+    @Test
+    public void testUpdateProduto_EntityNotFoundException() {
+        Long produtoId = 1L;
+        Produto produtoDetails = new Produto();
+
+        doThrow(new EntityNotFoundException("Produto não encontrado.")).when(produtoService).updateProduto(produtoId, produtoDetails.getNome(), produtoDetails.getPreco());
+
+        ResponseEntity<String> response = produtoController.updateProduto(produtoId, produtoDetails);
+
+        assertEquals(404, response.getStatusCodeValue());
+        assertEquals("Produto não encontrado.", response.getBody());
     }
 }

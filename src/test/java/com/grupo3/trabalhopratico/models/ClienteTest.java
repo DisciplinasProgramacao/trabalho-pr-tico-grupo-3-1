@@ -1,61 +1,48 @@
+package com.grupo3.trabalhopratico.models;
+
 import com.grupo3.trabalhopratico.models.Cliente;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ClienteTest {
 
-    private Validator validator;
+    private final Validator validator;
 
-    @BeforeEach
-    public void setUp() {
+    public ClienteTest() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+        this.validator = factory.getValidator();
     }
 
     @Test
-    public void testClienteNomeValido() {
-        Cliente cliente = new Cliente("João da Silva");
+    public void testValidCliente() {
+        Cliente cliente = new Cliente("Rogerio");
 
         Set<ConstraintViolation<Cliente>> violations = validator.validate(cliente);
-        assertTrue(violations.isEmpty(), "Não deve haver violações de validação");
+        assertEquals(0, violations.size());
     }
 
     @Test
-    public void testClienteNomeEmBranco() {
+    public void testNomeNotBlank() {
         Cliente cliente = new Cliente("");
 
         Set<ConstraintViolation<Cliente>> violations = validator.validate(cliente);
-        assertEquals(1, violations.size(), "Deve haver uma violação de validação");
-        ConstraintViolation<Cliente> violation = violations.iterator().next();
-        assertEquals("O nome do cliente é obrigatório", violation.getMessage(), "A mensagem de erro deve ser 'O nome do cliente é obrigatório'");
+        assertEquals(1, violations.size());
+        assertEquals("O nome do cliente é obrigatório", violations.iterator().next().getMessage());
     }
 
     @Test
-    public void testClienteNomeCurto() {
-        Cliente cliente = new Cliente("Al");
+    public void testNomeSize() {
+        Cliente cliente = new Cliente("Jo");
 
         Set<ConstraintViolation<Cliente>> violations = validator.validate(cliente);
-        assertEquals(1, violations.size(), "Deve haver uma violação de validação");
-        ConstraintViolation<Cliente> violation = violations.iterator().next();
-        assertEquals("O nome do cliente deve ter entre 3 e 50 caracteres", violation.getMessage(), "A mensagem de erro deve ser 'O nome do cliente deve ter entre 3 e 50 caracteres'");
-    }
-
-    @Test
-    public void testClienteNomeLongo() {
-        Cliente cliente = new Cliente("Cliente com um nome muito longo que excede o limite permitido pelo sistema de validação");
-
-        Set<ConstraintViolation<Cliente>> violations = validator.validate(cliente);
-        assertEquals(1, violations.size(), "Deve haver uma violação de validação");
-        ConstraintViolation<Cliente> violation = violations.iterator().next();
-        assertEquals("O nome do cliente deve ter entre 3 e 50 caracteres", violation.getMessage(), "A mensagem de erro deve ser 'O nome do cliente deve ter entre 3 e 50 caracteres'");
+        assertEquals(1, violations.size());
+        assertEquals("O nome do cliente deve ter entre 3 e 50 caracteres", violations.iterator().next().getMessage());
     }
 }

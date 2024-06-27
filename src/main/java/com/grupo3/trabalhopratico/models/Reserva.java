@@ -53,6 +53,14 @@ public class Reserva {
         this.filaRequisicoes.add(requisicao);
     }
 
+    public Queue<Requisicao> getFilaRequisicoes() {
+        return filaRequisicoes;
+    }
+
+    public void setFilaRequisicoes(Queue<Requisicao> filaRequisicoes) {
+        this.filaRequisicoes = filaRequisicoes;
+    }
+
     public Requisicao removerProximaRequisicaoFila() {
         return this.filaRequisicoes.poll();
     }

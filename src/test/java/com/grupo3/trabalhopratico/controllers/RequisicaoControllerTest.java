@@ -1,60 +1,104 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
+package com.grupo3.trabalhopratico.controllers;
+
 import com.grupo3.trabalhopratico.controllers.RequisicaoController;
-import com.grupo3.trabalhopratico.models.Cliente;
-import com.grupo3.trabalhopratico.models.Produto;
 import com.grupo3.trabalhopratico.models.Requisicao;
+import com.grupo3.trabalhopratico.models.Produto;
 import com.grupo3.trabalhopratico.services.RequisicaoService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(RequisicaoController.class)
 public class RequisicaoControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
+    @Mock
     private RequisicaoService requisicaoService;
 
+    @InjectMocks
+    private RequisicaoController requisicaoController;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
     @Test
-    public void testRegisterNewRequisicao() throws Exception {
-        // Criando um Cliente para a Requisição
-        Cliente cliente = new Cliente("Cliente Teste");
+    public void testGetRequisicoes() {
+        Requisicao requisicao = new Requisicao();
+        List<Requisicao> requisicoes = Collections.singletonList(requisicao);
 
-        // Criando a Requisição
-        Requisicao requisicao = new Requisicao(null, "Cliente Teste", 4, true, false, Collections.emptyList(), cliente);
+        when(requisicaoService.getRequisicoesAtivas()).thenReturn(requisicoes);
 
-        // Convertendo a Requisicao para JSON
-        String requisicaoJson = objectMapper.writeValueAsString(requisicao);
+        ResponseEntity<List<Requisicao>> response = requisicaoController.getRequisicoes(Optional.empty());
 
-        // Configurando o comportamento do serviço para métodos void
-        doNothing().when(requisicaoService).addNewRequisicao(any(Requisicao.class));
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(1, response.getBody().size());
+        assertEquals(requisicao, response.getBody().get(0));
+    }
 
-        // Realizando a requisição POST
-        mockMvc.perform(post("/requisicoes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requisicaoJson))
-                .andExpect(status().isCreated())
-                .andExpect(content().string("Requisição criada com sucesso"));
+    @Test
+    public void testRegisterNewRequisicao() {
+        Requisicao requisicao = new Requisicao();
+        ResponseEntity<String> response = requisicaoController.registerNewRequisicao(requisicao);
 
-        // Verificando se o método do serviço foi chamado
-        verify(requisicaoService, times(1)).addNewRequisicao(any(Requisicao.class));
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals("Requisição criada com sucesso e alocada na mesa.", response.getBody());
+        verify(requisicaoService, times(1)).addNewRequisicao(requisicao);
+    }
+
+    @Test
+    public void testGetRequisicao() {
+        Long requisicaoId = 1L;
+        Requisicao requisicao = new Requisicao();
+
+        when(requisicaoService.getRequisicao(requisicaoId)).thenReturn(requisicao);
+
+        ResponseEntity<Requisicao> response = requisicaoController.getRequisicao(requisicaoId);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(requisicao, response.getBody());
+    }
+
+    @Test
+    public void testAddProdutosToRequisicao() {
+        Long requisicaoId = 1L;
+        List<Produto> produtos = Collections.singletonList(new Produto());
+
+        ResponseEntity<String> response = requisicaoController.addProdutosToRequisicao(requisicaoId, produtos);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Produtos adicionados à requisição com sucesso", response.getBody());
+        verify(requisicaoService, times(1)).addProdutosToRequisicao(requisicaoId, produtos);
+    }
+
+    @Test
+    public void testSetRequisicaoEmAtendimento() {
+        Long requisicaoId = 1L;
+
+        ResponseEntity<String> response = requisicaoController.setRequisicaoEmAtendimento(requisicaoId);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Requisição marcada como em atendimento", response.getBody());
+        verify(requisicaoService, times(1)).setRequisicaoEmAtendimento(requisicaoId);
+    }
+
+    @Test
+    public void testDeleteRequisicao() {
+        Long requisicaoId = 1L;
+
+        ResponseEntity<String> response = requisicaoController.deleteRequisicao(requisicaoId);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Requisição encerrada e mesa liberada com sucesso", response.getBody());
+        verify(requisicaoService, times(1)).closeRequisicao(requisicaoId);
     }
 }

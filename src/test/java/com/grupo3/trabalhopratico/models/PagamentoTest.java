@@ -1,56 +1,43 @@
+package com.grupo3.trabalhopratico.models;
+
 import com.grupo3.trabalhopratico.models.Pagamento;
 import org.junit.jupiter.api.Test;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PagamentoTest {
 
+    private final Validator validator;
+
+    public PagamentoTest() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        this.validator = factory.getValidator();
+    }
+
     @Test
     public void testValidPagamento() {
-        Pagamento pagamento = new Pagamento(null, 100.0, 10.0, "Cartão de Crédito", LocalDate.now());
+        Pagamento pagamento = new Pagamento(1L, 100.0, 10.0, "Cartão", LocalDate.now());
 
-        // Validando os campos manualmente
-        assertAll("pagamento",
-                () -> assertNotNull(pagamento.getId(), "ID não deve ser nulo"),
-                () -> assertEquals(100.0, pagamento.getValorPago(), "Valor pago deve ser 100.0"),
-                () -> assertEquals(10.0, pagamento.getValorDescontado(), "Valor descontado deve ser 10.0"),
-                () -> assertEquals("Cartão de Crédito", pagamento.getMetodoPagamento(), "Método de pagamento deve ser 'Cartão de Crédito'"),
-                () -> assertNotNull(pagamento.getDataPagamento(), "Data de pagamento não deve ser nula")
-        );
+        Set<ConstraintViolation<Pagamento>> violations = validator.validate(pagamento);
+        assertEquals(0, violations.size());
     }
 
     @Test
-    public void testInvalidPagamento() {
-        Pagamento pagamento = new Pagamento(null, 0.0, 10.0, null, null);
-
-        // Validando campos com valores inválidos
-        assertAll("pagamento inválido",
-                () -> assertNull(pagamento.getId(), "ID deve ser nulo"),
-                () -> assertEquals(0.0, pagamento.getValorPago(), "Valor pago deve ser 0.0"),
-                () -> assertEquals(10.0, pagamento.getValorDescontado(), "Valor descontado deve ser 10.0"),
-                () -> assertNull(pagamento.getMetodoPagamento(), "Método de pagamento deve ser nulo"),
-                () -> assertNull(pagamento.getDataPagamento(), "Data de pagamento deve ser nula")
-        );
-    }
-
-    @Test
-    public void testGettersAndSetters() {
-        Pagamento pagamento = new Pagamento(null, 0.0, 0.0, null, null);
-
-        // Testando os métodos setters
-        pagamento.setId(1L);
-        pagamento.setValorPago(100.0);
+    public void testValorPagoNotNull() {
+        Pagamento pagamento = new Pagamento();
         pagamento.setValorDescontado(10.0);
-        pagamento.setMetodoPagamento("Cartão de Débito");
+        pagamento.setMetodoPagamento("Cartão");
         pagamento.setDataPagamento(LocalDate.now());
 
-        // Testando os métodos getters
-        assertEquals(1L, pagamento.getId());
-        assertEquals(100.0, pagamento.getValorPago());
-        assertEquals(10.0, pagamento.getValorDescontado());
-        assertEquals("Cartão de Débito", pagamento.getMetodoPagamento());
-        assertEquals(LocalDate.now(), pagamento.getDataPagamento());
+        Set<ConstraintViolation<Pagamento>> violations = validator.validate(pagamento);
+        assertEquals(1, violations.size());
+        assertEquals("O valor pago é obrigatório", violations.iterator().next().getMessage());
     }
 }

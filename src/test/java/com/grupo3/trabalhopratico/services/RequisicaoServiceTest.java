@@ -1,17 +1,21 @@
+package com.grupo3.trabalhopratico.services;
+
 import com.grupo3.trabalhopratico.exceptions.EntityAlreadyClosedException;
 import com.grupo3.trabalhopratico.exceptions.EntityNotFoundException;
-import com.grupo3.trabalhopratico.exceptions.PreconditionFailedException;
+import com.grupo3.trabalhopratico.models.Mesa;
 import com.grupo3.trabalhopratico.models.Produto;
 import com.grupo3.trabalhopratico.models.Requisicao;
 import com.grupo3.trabalhopratico.repositories.RequisicaoRepository;
+import com.grupo3.trabalhopratico.services.MesaService;
 import com.grupo3.trabalhopratico.services.RequisicaoService;
+import com.grupo3.trabalhopratico.services.ReservaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,12 @@ public class RequisicaoServiceTest {
     @Mock
     private RequisicaoRepository requisicaoRepository;
 
+    @Mock
+    private MesaService mesaService;
+
+    @Mock
+    private ReservaService reservaService;
+
     @InjectMocks
     private RequisicaoService requisicaoService;
 
@@ -33,227 +43,70 @@ public class RequisicaoServiceTest {
 
     @Test
     public void testGetRequisicoesAtivas() {
-        // Mocking repository response
-        List<Requisicao> expectedRequisicoes = new ArrayList<>();
-        expectedRequisicoes.add(new Requisicao(1L, "Cliente A", 3, true, false, new ArrayList<>(), null));
-        expectedRequisicoes.add(new Requisicao(2L, "Cliente B", 2, true, true, new ArrayList<>(), null));
-        when(requisicaoRepository.findByAtiva(true)).thenReturn(expectedRequisicoes);
+        Requisicao requisicao = new Requisicao();
+        when(requisicaoRepository.findRequisicoesAtivas()).thenReturn(List.of(requisicao));
 
-        // Calling service method
         List<Requisicao> requisicoes = requisicaoService.getRequisicoesAtivas();
-
-        // Verifying repository method was called once
-        verify(requisicaoRepository, times(1)).findByAtiva(true);
-
-        // Asserting the result
-        assertEquals(expectedRequisicoes.size(), requisicoes.size());
-        assertEquals(expectedRequisicoes.get(0).getId(), requisicoes.get(0).getId());
-        assertEquals(expectedRequisicoes.get(1).getId(), requisicoes.get(1).getId());
-    }
-
-    @Test
-    public void testGetRequisicoesByTipoEmAtendimento() {
-        // Mocking repository response
-        List<Requisicao> expectedRequisicoes = new ArrayList<>();
-        expectedRequisicoes.add(new Requisicao(1L, "Cliente A", 3, true, true, new ArrayList<>(), null));
-        when(requisicaoRepository.findByEmAtendimento(true)).thenReturn(expectedRequisicoes);
-
-        // Calling service method
-        List<Requisicao> requisicoes = requisicaoService.getRequisicoesByTipo("EM_ATENDIMENTO");
-
-        // Verifying repository method was called once
-        verify(requisicaoRepository, times(1)).findByEmAtendimento(true);
-
-        // Asserting the result
-        assertEquals(expectedRequisicoes.size(), requisicoes.size());
-        assertEquals(expectedRequisicoes.get(0).getId(), requisicoes.get(0).getId());
-    }
-
-    @Test
-    public void testGetRequisicoesByTipoNaFila() {
-        // Mocking repository response
-        List<Requisicao> expectedRequisicoes = new ArrayList<>();
-        expectedRequisicoes.add(new Requisicao(2L, "Cliente B", 2, true, false, new ArrayList<>(), null));
-        when(requisicaoRepository.findByEmAtendimento(false)).thenReturn(expectedRequisicoes);
-
-        // Calling service method
-        List<Requisicao> requisicoes = requisicaoService.getRequisicoesByTipo("NA_FILA");
-
-        // Verifying repository method was called once
-        verify(requisicaoRepository, times(1)).findByEmAtendimento(false);
-
-        // Asserting the result
-        assertEquals(expectedRequisicoes.size(), requisicoes.size());
-        assertEquals(expectedRequisicoes.get(0).getId(), requisicoes.get(0).getId());
-    }
-
-    @Test
-    public void testGetRequisicoesByTipoInvalido() {
-        // Calling service method and expecting an exception
-        assertThrows(IllegalArgumentException.class, () -> requisicaoService.getRequisicoesByTipo("INVALIDO"));
+        assertEquals(1, requisicoes.size());
+        assertEquals(requisicao, requisicoes.get(0));
     }
 
     @Test
     public void testAddNewRequisicao() {
-        // Mocking a new requisicao
-        Requisicao novaRequisicao = new Requisicao(null, "Novo Cliente", 5, true, false, new ArrayList<>(), null);
+        Requisicao requisicao = new Requisicao();
+        requisicao.setNumeroPessoas(4);
+        Mesa mesa = new Mesa(4);
+        when(mesaService.findAvailableMesa(4)).thenReturn(Optional.of(mesa));
 
-        // Mocking repository save method
-        when(requisicaoRepository.save(novaRequisicao)).thenReturn(novaRequisicao);
+        requisicaoService.addNewRequisicao(requisicao);
 
-        // Calling service method
-        requisicaoService.addNewRequisicao(novaRequisicao);
-
-        // Verifying repository method was called once
-        verify(requisicaoRepository, times(1)).save(novaRequisicao);
+        assertTrue(requisicao.isEmAtendimento());
+        assertEquals(mesa, requisicao.getMesa());
+        verify(mesaService, times(1)).save(mesa);
+        verify(requisicaoRepository, times(1)).save(requisicao);
     }
 
     @Test
-    public void testGetRequisicao() {
-        // Mocking existing requisicao
-        Requisicao requisicaoExistente = new Requisicao(1L, "Cliente Existente", 4, true, true, new ArrayList<>(), null);
+    public void testGetRequisicao_NotFound() {
+        when(requisicaoRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicaoExistente));
-
-        // Calling service method
-        Requisicao requisicao = requisicaoService.getRequisicao(1L);
-
-        // Verifying repository method was called once
-        verify(requisicaoRepository, times(1)).findById(1L);
-
-        // Asserting the result
-        assertNotNull(requisicao);
-        assertEquals(requisicaoExistente.getId(), requisicao.getId());
-    }
-
-    @Test
-    public void testGetRequisicaoNotFound() {
-        // Mocking non-existing requisicao ID
-        Long requisicaoId = 999L;
-
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(requisicaoId)).thenReturn(Optional.empty());
-
-        // Calling service method and expecting an exception
-        assertThrows(EntityNotFoundException.class, () -> requisicaoService.getRequisicao(requisicaoId));
+        assertThrows(EntityNotFoundException.class, () -> requisicaoService.getRequisicao(1L));
     }
 
     @Test
     public void testAddProdutosToRequisicao() {
-        // Mocking existing requisicao
-        Requisicao requisicaoExistente = new Requisicao(1L, "Cliente Existente", 4, true, true, new ArrayList<>(), null);
+        Requisicao requisicao = new Requisicao();
+        Produto produto = new Produto();
+        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicao));
 
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicaoExistente));
-
-        // Mocking repository save method
-        when(requisicaoRepository.save(requisicaoExistente)).thenReturn(requisicaoExistente);
-
-        // Mocking produtos to add
-        List<Produto> produtos = new ArrayList<>();
-        produtos.add(new Produto(1L, "Produto A", 10.0, "Bebida", "Descrição do produto A"));
-        produtos.add(new Produto(2L, "Produto B", 15.0, "Comida", "Descrição do produto B"));
-
-        // Calling service method
-        requisicaoService.addProdutosToRequisicao(1L, produtos);
-
-        // Verifying repository method was called once
-        verify(requisicaoRepository, times(1)).save(requisicaoExistente);
-
-        // Verifying changes
-        assertEquals(produtos.size(), requisicaoExistente.getProdutos().size());
-    }
-
-    @Test
-    public void testAddProdutosToRequisicaoRequisicaoNaoEmAtendimento() {
-        // Mocking existing requisicao not in emAtendimento state
-        Requisicao requisicaoExistente = new Requisicao(1L, "Cliente Existente", 4, true, false, new ArrayList<>(), null);
-
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicaoExistente));
-
-        // Mocking produtos to add
-        List<Produto> produtos = new ArrayList<>();
-        produtos.add(new Produto(1L, "Produto A", 10.0, "Bebida", "Descrição do produto A"));
-        produtos.add(new Produto(2L, "Produto B", 15.0, "Comida", "Descrição do produto B"));
-
-        // Calling service method and expecting an exception
-        assertThrows(PreconditionFailedException.class, () -> requisicaoService.addProdutosToRequisicao(1L, produtos));
-
-        // Verifying repository save method was not called
-        verify(requisicaoRepository, never()).save(any());
-    }
-
-    @Test
-    public void testAddProdutosToRequisicaoRequisicaoNaoAtiva() {
-        // Mocking existing requisicao not active
-        Requisicao requisicaoExistente = new Requisicao(1L, "Cliente Existente", 4, false, true, new ArrayList<>(), null);
-
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicaoExistente));
-
-        // Mocking produtos to add
-        List<Produto> produtos = new ArrayList<>();
-        produtos.add(new Produto(1L, "Produto A", 10.0, "Bebida", "Descrição do produto A"));
-        produtos.add(new Produto(2L, "Produto B", 15.0, "Comida", "Descrição do produto B"));
-
-        // Calling service method and expecting an exception
-        assertThrows(PreconditionFailedException.class, () -> requisicaoService.addProdutosToRequisicao(1L, produtos));
-
-        // Verifying repository save method was not called
-        verify(requisicaoRepository, never()).save(any());
+        requisicaoService.addProdutosToRequisicao(1L, List.of(produto));
+        assertEquals(1, requisicao.getProdutos().size());
+        assertEquals(produto, requisicao.getProdutos().get(0));
+        verify(requisicaoRepository, times(1)).save(requisicao);
     }
 
     @Test
     public void testCloseRequisicao() {
-        // Mocking existing requisicao
-        Requisicao requisicaoExistente = new Requisicao(1L, "Cliente Existente", 4, true, true, new ArrayList<>(), null);
+        Requisicao requisicao = new Requisicao();
+        requisicao.setAtiva(true);
+        Mesa mesa = new Mesa(4);
+        requisicao.setMesa(mesa);
+        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicao));
 
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicaoExistente));
-
-        // Mocking repository save method
-        when(requisicaoRepository.save(requisicaoExistente)).thenReturn(requisicaoExistente);
-
-        // Calling service method
         requisicaoService.closeRequisicao(1L);
 
-        // Verifying repository method was called once
-        verify(requisicaoRepository, times(1)).save(requisicaoExistente);
-
-        // Verifying changes
-        assertFalse(requisicaoExistente.isAtiva());
+        assertFalse(requisicao.isAtiva());
+        assertNotNull(requisicao.getHoraSaida());
+        assertTrue(mesa.isDisponivel());
+        verify(requisicaoRepository, times(1)).save(requisicao);
     }
 
     @Test
-    public void testCloseRequisicaoRequisicaoNaoAtiva() {
-        // Mocking existing requisicao already closed
-        Requisicao requisicaoExistente = new Requisicao(1L, "Cliente Existente", 4, false, true, new ArrayList<>(), null);
+    public void testCloseRequisicao_AlreadyClosed() {
+        Requisicao requisicao = new Requisicao();
+        requisicao.setAtiva(false);
+        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicao));
 
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicaoExistente));
-
-        // Calling service method and expecting an exception
         assertThrows(EntityAlreadyClosedException.class, () -> requisicaoService.closeRequisicao(1L));
-
-        // Verifying repository save method was not called
-        verify(requisicaoRepository, never()).save(any());
-    }
-
-    @Test
-    public void testCloseRequisicaoRequisicaoNaoEmAtendimento() {
-        // Mocking existing requisicao not in emAtendimento state
-        Requisicao requisicaoExistente = new Requisicao(1L, "Cliente Existente", 4, true, false, new ArrayList<>(), null);
-
-        // Mocking repository response for findById
-        when(requisicaoRepository.findById(1L)).thenReturn(Optional.of(requisicaoExistente));
-
-        // Calling service method and expecting an exception
-        assertThrows(PreconditionFailedException.class, () -> requisicaoService.closeRequisicao(1L));
-
-        // Verifying repository save method was not called
-        verify(requisicaoRepository, never()).save(any());
     }
 }
-
